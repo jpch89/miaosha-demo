@@ -1,0 +1,41 @@
+package tech.tuanzi.miaosha.controller;
+
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import tech.tuanzi.miaosha.service.IUserService;
+import tech.tuanzi.miaosha.vo.LoginVo;
+import tech.tuanzi.miaosha.vo.RespBean;
+
+/**
+ * 登录
+ * 注意：@RestController 会给类下面的所有方法加上 @ResponseBody
+ *
+ * @author Patrick Ji
+ */
+@Controller
+@RequestMapping("/login")
+@Slf4j
+public class LoginController {
+    @Autowired
+    private IUserService userService;
+
+    /**
+     * 跳转登录页面
+     */
+    @RequestMapping("/toLogin")
+    public String toLogin() {
+        return "login";
+    }
+
+    /**
+     * 登录功能
+     */
+    @RequestMapping("/doLogin")
+    @ResponseBody
+    public RespBean doLogin(LoginVo loginVo) {
+        return userService.doLogin(loginVo);
+    }
+}
