@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tech.tuanzi.miaosha.entity.User;
+import tech.tuanzi.miaosha.exception.GlobalException;
 import tech.tuanzi.miaosha.mapper.UserMapper;
 import tech.tuanzi.miaosha.service.IUserService;
 import tech.tuanzi.miaosha.utils.MD5Util;
@@ -42,14 +43,16 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         // 根据手机号获取用户
         User user = userMapper.selectById(mobile);
         if (null == user) {
-            return RespBean.error(RespBeanEnum.LOGIN_ERROR);
+            // return RespBean.error(RespBeanEnum.LOGIN_ERROR);
+            throw new GlobalException(RespBeanEnum.LOGIN_ERROR);
         }
 
         // 判断密码是否正确
         String passwordHash1 = MD5Util.formPassToDBPass(password, user.getSalt());
         String passwordHash2 = user.getPassword();
         if (!passwordHash1.equals(passwordHash2)) {
-            return RespBean.error(RespBeanEnum.LOGIN_ERROR);
+            // return RespBean.error(RespBeanEnum.LOGIN_ERROR);
+            throw new GlobalException(RespBeanEnum.LOGIN_ERROR);
         }
 
         return RespBean.success();
