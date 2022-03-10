@@ -2,15 +2,12 @@ package tech.tuanzi.miaosha.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.ibatis.annotations.Mapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.thymeleaf.util.StringUtils;
 import tech.tuanzi.miaosha.entity.User;
 import tech.tuanzi.miaosha.mapper.UserMapper;
 import tech.tuanzi.miaosha.service.IUserService;
 import tech.tuanzi.miaosha.utils.MD5Util;
-import tech.tuanzi.miaosha.utils.ValidatorUtil;
 import tech.tuanzi.miaosha.vo.LoginVo;
 import tech.tuanzi.miaosha.vo.RespBean;
 import tech.tuanzi.miaosha.vo.RespBeanEnum;
@@ -35,12 +32,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         String password = loginVo.getPassword();
 
         // 参数校验
-        if (StringUtils.isEmpty(mobile) || StringUtils.isEmpty(password)) {
-            return RespBean.error(RespBeanEnum.LOGIN_ERROR);
-        }
-        if (!ValidatorUtil.isMobile(mobile)) {
-            return RespBean.error(RespBeanEnum.MOBILE_ERROR);
-        }
+        // if (StringUtils.isEmpty(mobile) || StringUtils.isEmpty(password)) {
+        //     return RespBean.error(RespBeanEnum.LOGIN_ERROR);
+        // }
+        // if (!ValidatorUtil.isMobile(mobile)) {
+        //     return RespBean.error(RespBeanEnum.MOBILE_ERROR);
+        // }
 
         // 根据手机号获取用户
         User user = userMapper.selectById(mobile);

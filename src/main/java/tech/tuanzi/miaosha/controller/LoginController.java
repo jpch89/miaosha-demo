@@ -9,6 +9,8 @@ import tech.tuanzi.miaosha.service.IUserService;
 import tech.tuanzi.miaosha.vo.LoginVo;
 import tech.tuanzi.miaosha.vo.RespBean;
 
+import javax.validation.Valid;
+
 /**
  * 登录
  * 注意：@RestController 会给类下面的所有方法加上 @ResponseBody
@@ -35,7 +37,7 @@ public class LoginController {
      */
     @RequestMapping("/doLogin")
     @ResponseBody
-    public RespBean doLogin(LoginVo loginVo) {
+    public RespBean doLogin(@Valid LoginVo loginVo) {
         return userService.doLogin(loginVo);
     }
 }
