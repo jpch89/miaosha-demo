@@ -8,10 +8,15 @@ import tech.tuanzi.miaosha.entity.User;
 import tech.tuanzi.miaosha.exception.GlobalException;
 import tech.tuanzi.miaosha.mapper.UserMapper;
 import tech.tuanzi.miaosha.service.IUserService;
+import tech.tuanzi.miaosha.utils.CookieUtil;
 import tech.tuanzi.miaosha.utils.MD5Util;
+import tech.tuanzi.miaosha.utils.UUIDUtil;
 import tech.tuanzi.miaosha.vo.LoginVo;
 import tech.tuanzi.miaosha.vo.RespBean;
 import tech.tuanzi.miaosha.vo.RespBeanEnum;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * <p>
@@ -27,23 +32,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     private UserMapper userMapper;
 
     @Override
-    public RespBean doLogin(LoginVo loginVo) {
+    public RespBean doLogin(LoginVo loginVo, HttpServletRequest request, HttpServletResponse response) {
         // 获取参数
         String mobile = loginVo.getMobile();
         String password = loginVo.getPassword();
 
-        // 参数校验
-        // if (StringUtils.isEmpty(mobile) || StringUtils.isEmpty(password)) {
-        //     return RespBean.error(RespBeanEnum.LOGIN_ERROR);
-        // }
-        // if (!ValidatorUtil.isMobile(mobile)) {
-        //     return RespBean.error(RespBeanEnum.MOBILE_ERROR);
-        // }
-
         // 根据手机号获取用户
         User user = userMapper.selectById(mobile);
         if (null == user) {
-            // return RespBean.error(RespBeanEnum.LOGIN_ERROR);
             throw new GlobalException(RespBeanEnum.LOGIN_ERROR);
         }
 
@@ -51,9 +47,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         String passwordHash1 = MD5Util.formPassToDBPass(password, user.getSalt());
         String passwordHash2 = user.getPassword();
         if (!passwordHash1.equals(passwordHash2)) {
-            // return RespBean.error(RespBeanEnum.LOGIN_ERROR);
             throw new GlobalException(RespBeanEnum.LOGIN_ERROR);
         }
+
+        // 生成 cookie
+        String ticket = UUIDUtil.uuid();
+        request.getSession().setAttribute(ticket, user);
+        CookieUtil.setCookie(request, response, "userTicket", ticket);
 
         return RespBean.success();
     }

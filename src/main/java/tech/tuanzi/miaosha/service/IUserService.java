@@ -5,6 +5,9 @@ import tech.tuanzi.miaosha.entity.User;
 import tech.tuanzi.miaosha.vo.LoginVo;
 import tech.tuanzi.miaosha.vo.RespBean;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 /**
  * <p>
  * 用户服务类
@@ -16,5 +19,5 @@ public interface IUserService extends IService<User> {
     /**
      * 登录
      */
-    RespBean doLogin(LoginVo loginVo);
+    RespBean doLogin(LoginVo loginVo, HttpServletRequest request, HttpServletResponse response);
 }

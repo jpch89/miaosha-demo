@@ -9,6 +9,8 @@ import tech.tuanzi.miaosha.service.IUserService;
 import tech.tuanzi.miaosha.vo.LoginVo;
 import tech.tuanzi.miaosha.vo.RespBean;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 /**
@@ -37,7 +39,7 @@ public class LoginController {
      */
     @RequestMapping("/doLogin")
     @ResponseBody
-    public RespBean doLogin(@Valid LoginVo loginVo) {
-        return userService.doLogin(loginVo);
+    public RespBean doLogin(@Valid LoginVo loginVo, HttpServletRequest request, HttpServletResponse response) {
+        return userService.doLogin(loginVo, request, response);
     }
 }
