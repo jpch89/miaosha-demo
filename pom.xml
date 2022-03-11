@@ -77,15 +77,6 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-pool2</artifactId>
         </dependency>
-
-        <!-- SpringSession 依赖 -->
-        <!-- SpringSession 默认使用 Redis -->
-        <!-- 也可以用 MongoDB，JDBC，原理是将 session 单独存到一个第三方处理 -->
-        <dependency>
-            <groupId>org.springframework.session</groupId>
-            <artifactId>spring-session-data-redis</artifactId>
-        </dependency>
-
     </dependencies>
 
     <build>

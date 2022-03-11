@@ -20,4 +20,9 @@ public interface IUserService extends IService<User> {
      * 登录
      */
     RespBean doLogin(LoginVo loginVo, HttpServletRequest request, HttpServletResponse response);
+
+    /**
+     * 根据 cookie 获取用户
+     */
+    User getUserByCookie(String userTicket, HttpServletRequest request, HttpServletResponse response);
 }

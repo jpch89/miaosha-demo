@@ -1,0 +1,36 @@
+package tech.tuanzi.miaosha.config;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
+
+/**
+ * Redis 配置类
+ *
+ * @author Patrick Ji
+ */
+@Configuration
+public class RedisConfig {
+    @Bean
+    public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
+        RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
+        // key 序列化
+        redisTemplate.setKeySerializer(new StringRedisSerializer());
+        // value 序列化
+        // Redis 默认是 JDK 序列化，也就是二进制，产生的数据会比较长
+        // 其他可选项：Jdk、Jackson2JsonRedisSerializer
+        // 使用 Jackson2JsonRedisSerializer 需要传递类对象，而 GenericJackson2JsonRedisSerializer 不用
+        redisTemplate.setValueSerializer(new GenericJackson2JsonRedisSerializer());
+        // hash 类型：key 序列化
+        redisTemplate.setHashKeySerializer(new StringRedisSerializer());
+        // hash 类型：value 序列化
+        redisTemplate.setHashValueSerializer(new GenericJackson2JsonRedisSerializer());
+
+        // 注入连接工厂
+        redisTemplate.setConnectionFactory(redisConnectionFactory);
+        return redisTemplate;
+    }
+}
