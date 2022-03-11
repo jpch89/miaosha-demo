@@ -69,12 +69,12 @@ CREATE TABLE `t_miaosha_order`
   DEFAULT CHARSET = utf8mb4 COMMENT = '秒杀订单';
 
 INSERT INTO `t_goods`
-VALUES (1, 'IPHONE 12', 'IPHONE 12 64GB', 'IPHONE 12 64GB', '/img/iphone12.png', '6299.00', 100),
+VALUES (1, 'IPHONE 12', 'IPHONE 12 64GB', '/img/iphone12.png', 'IPHONE 12 64GB', '6299.00', 100),
        (2,
         'IPHONE 12 PRO',
         'IHPONE 12 PRO 128GB',
-        'IPHONE 12 PRO 128GB',
         '/img/iphone12pro.png',
+        'IPHONE 12 PRO 128GB',
         '9299.00',
         100);
 
