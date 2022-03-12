@@ -33,4 +33,20 @@
         FROM t_goods g
                  LEFT JOIN t_miaosha_goods AS mg ON g.id = mg.goods_id;
     </select>
+    <select id="findGoodsVoByGoodsId" resultType="tech.tuanzi.miaosha.vo.GoodsVo">
+        SELECT g.id,
+               g.goods_name,
+               g.goods_title,
+               g.goods_img,
+               g.goods_detail,
+               g.goods_price,
+               g.goods_stock,
+               mg.miaosha_price,
+               mg.stock_count,
+               mg.start_date,
+               mg.end_date
+        FROM t_goods g
+                 LEFT JOIN t_miaosha_goods AS mg ON g.id = mg.goods_id
+        WHERE g.id = #{goodsId};
+    </select>
 </mapper>
