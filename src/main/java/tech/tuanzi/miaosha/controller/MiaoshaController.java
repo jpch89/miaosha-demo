@@ -1,12 +1,16 @@
 package tech.tuanzi.miaosha.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
+import tech.tuanzi.miaosha.entity.MiaoshaOrder;
+import tech.tuanzi.miaosha.entity.Order;
 import tech.tuanzi.miaosha.entity.User;
 import tech.tuanzi.miaosha.service.IGoodsService;
-import tech.tuanzi.miaosha.service.impl.GoodsServiceImpl;
+import tech.tuanzi.miaosha.service.IMiaoshaOrderService;
+import tech.tuanzi.miaosha.service.IOrderService;
 import tech.tuanzi.miaosha.vo.GoodsVo;
 import tech.tuanzi.miaosha.vo.RespBeanEnum;
 
@@ -20,6 +24,10 @@ import tech.tuanzi.miaosha.vo.RespBeanEnum;
 public class MiaoshaController {
     @Autowired
     private IGoodsService goodsService;
+    @Autowired
+    private IMiaoshaOrderService miaoshaOrderService;
+    @Autowired
+    private IOrderService orderService;
 
     /**
      * 秒杀
@@ -31,12 +39,25 @@ public class MiaoshaController {
         }
         model.addAttribute("user", user);
 
-        GoodsVo goodsVo = goodsService.findGoodsVoByGoodsId(goodsId);
-        if (goodsVo.getStockCount() < 1) {
+        GoodsVo goods = goodsService.findGoodsVoByGoodsId(goodsId);
+        // 判断库存
+        if (goods.getStockCount() < 1) {
             model.addAttribute("errmsg", RespBeanEnum.EMPTY_STOCK.getMessage());
             return "miaoshaFail";
         }
 
-        return "";
+        // 判断是否重复抢购
+        MiaoshaOrder miaoshaOrder = miaoshaOrderService.getOne(
+                new QueryWrapper<MiaoshaOrder>().eq("user_id", user.getId()).eq("goods_id", goodsId)
+        );
+        if (miaoshaOrder != null) {
+            model.addAttribute("errmsg", RespBeanEnum.REPEAT_ERROR.getMessage());
+            return "miaoshaFail";
+        }
+
+        Order order = orderService.miaosha(user, goods);
+        model.addAttribute("order", order);
+        model.addAttribute("goods", goods);
+        return "orderDetail";
     }
 }
