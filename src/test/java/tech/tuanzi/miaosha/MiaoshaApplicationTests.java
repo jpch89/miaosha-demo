@@ -1,4 +1,4 @@
-package com.example.miaosha;
+package tech.tuanzi.miaosha;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
