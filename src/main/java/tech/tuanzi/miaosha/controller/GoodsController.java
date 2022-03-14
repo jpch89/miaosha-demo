@@ -22,6 +22,12 @@ public class GoodsController {
     @Autowired
     private IGoodsService goodsService;
 
+    /**
+     * 跳转商品列表页
+     * 1000个线程 * 10轮的压测结果：
+     * Windows 优化前 QPS：1332
+     * Linux 优化前 QPS：207
+     */
     @RequestMapping("/toList")
     public String toList(Model model, User user) {
         model.addAttribute("user", user);
