@@ -82,3 +82,8 @@ VALUES (1, 'IPHONE 12', 'IPHONE 12 64GB', '/img/iphone12.png', 'IPHONE 12 64GB',
 INSERT INTO `t_miaosha_goods`
 VALUES (1, 1, '629', 10, '2022-11-11 08:00:00', '2022-11-11 09:00:00'),
        (2, 2, '929', 10, '2022-11-11 08:00:00', '2022-11-11 09:00:00');
+
+-- t_miaosha_order 添加唯一索引 miaosha_uid_gid
+-- 解决同一个用户秒杀多商品
+ALTER TABLE `t_miaosha_order`
+    ADD INDEX `miaosha_uid_gid` (user_id, goods_id) USING BTREE COMMENT '用户id+商品id的唯一索引，解决同一个用户秒杀多商品';

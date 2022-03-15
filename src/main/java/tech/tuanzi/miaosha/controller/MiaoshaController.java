@@ -2,6 +2,7 @@ package tech.tuanzi.miaosha.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -31,11 +32,16 @@ public class MiaoshaController {
     private IMiaoshaOrderService miaoshaOrderService;
     @Autowired
     private IOrderService orderService;
+    @Autowired
+    private RedisTemplate redisTemplate;
 
     /**
      * 秒杀
      * Windows 优化前 QPS：785
      * Linux 优化前 QPS：170
+     *
+     * 缓存后：
+     * Windows QPS：1356
      */
     @RequestMapping(value = "/doMiaosha", method = RequestMethod.POST)
     @ResponseBody
@@ -52,9 +58,12 @@ public class MiaoshaController {
         }
 
         // 判断是否重复抢购
-        MiaoshaOrder miaoshaOrder = miaoshaOrderService.getOne(
-                new QueryWrapper<MiaoshaOrder>().eq("user_id", user.getId()).eq("goods_id", goodsId)
-        );
+        // MiaoshaOrder miaoshaOrder = miaoshaOrderService.getOne(
+        //         new QueryWrapper<MiaoshaOrder>().eq("user_id", user.getId()).eq("goods_id", goodsId)
+        // );
+        MiaoshaOrder miaoshaOrder = (MiaoshaOrder) redisTemplate
+                .opsForValue()
+                .get("order:" + user.getId() + ":" + goodsId);
         if (miaoshaOrder != null) {
             model.addAttribute("errmsg", RespBeanEnum.REPEAT_ERROR.getMessage());
             return RespBean.error(RespBeanEnum.REPEAT_ERROR);

@@ -9,6 +9,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -33,24 +35,24 @@ public class UserUtil {
             users.add(user);
         }
         System.out.println("create user");
-        // // //插入数据库
-        // Connection conn = getConn();
-        // String sql = "insert into t_user(login_count, nickname, register_date, slat, password, id)values(?,?,?,?,?,?)";
-        // PreparedStatement pstmt = conn.prepareStatement(sql);
-        // for (int i = 0; i < users.size(); i++) {
-        // 	User user = users.get(i);
-        // 	pstmt.setInt(1, user.getLoginCount());
-        // 	pstmt.setString(2, user.getNickname());
-        // 	pstmt.setTimestamp(3, new Timestamp(user.getRegisterDate().getTime()));
-        // 	pstmt.setString(4, user.getSlat());
-        // 	pstmt.setString(5, user.getPassword());
-        // 	pstmt.setLong(6, user.getId());
-        // 	pstmt.addBatch();
-        // }
-        // pstmt.executeBatch();
-        // pstmt.close();
-        // conn.close();
-        // System.out.println("insert to db");
+        // 插入数据库
+        Connection conn = getConn();
+        String sql = "insert into t_user(login_count, nickname, register_date, salt, password, id)values(?,?,?,?,?,?)";
+        PreparedStatement pstmt = conn.prepareStatement(sql);
+        for (int i = 0; i < users.size(); i++) {
+            User user = users.get(i);
+            pstmt.setInt(1, user.getLoginCount());
+            pstmt.setString(2, user.getNickname());
+            pstmt.setTimestamp(3, new Timestamp(user.getRegisterDate().getTime()));
+            pstmt.setString(4, user.getSalt());
+            pstmt.setString(5, user.getPassword());
+            pstmt.setLong(6, user.getId());
+            pstmt.addBatch();
+        }
+        pstmt.executeBatch();
+        pstmt.close();
+        conn.close();
+        System.out.println("insert to db");
         //登录，生成userTicket
         String urlString = "http://localhost:8080/login/doLogin";
         File file = new File("C:\\Users\\patrick\\Desktop\\config.txt");
@@ -83,7 +85,7 @@ public class UserUtil {
             ObjectMapper mapper = new ObjectMapper();
             RespBean respBean = mapper.readValue(response, RespBean.class);
             String userTicket = ((String) respBean.getObj());
-            System.out.println("create userTicket : " + user.getId());
+            System.out.println("create userTicket : " + userTicket + " for user: " + user.getId());
 
             String row = user.getId() + "," + userTicket;
             raf.seek(raf.length());
@@ -96,7 +98,7 @@ public class UserUtil {
     }
 
     private static Connection getConn() throws Exception {
-        String url = "jdbc:mysql://localhost:3306/seckill?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai";
+        String url = "jdbc:mysql://localhost:3306/miaosha?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai";
         String username = "root";
         String password = "";
         String driver = "com.mysql.cj.jdbc.Driver";

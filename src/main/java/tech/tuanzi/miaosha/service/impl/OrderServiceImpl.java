@@ -1,9 +1,12 @@
 package tech.tuanzi.miaosha.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tech.tuanzi.miaosha.entity.MiaoshaGoods;
 import tech.tuanzi.miaosha.entity.MiaoshaOrder;
 import tech.tuanzi.miaosha.entity.Order;
@@ -37,10 +40,13 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     private IMiaoshaOrderService miaoshaOrderService;
     @Autowired
     private IGoodsService goodsService;
+    @Autowired
+    private RedisTemplate redisTemplate;
 
     /**
      * 秒杀
      */
+    @Transactional
     @Override
     public Order miaosha(User user, GoodsVo goods) {
         // 秒杀商品表减库存
@@ -48,7 +54,16 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
                 new QueryWrapper<MiaoshaGoods>().eq("goods_id", goods.getId())
         );
         miaoshaGoods.setStockCount(miaoshaGoods.getStockCount() - 1);
-        miaoshaGoodsService.updateById(miaoshaGoods);
+        boolean result = miaoshaGoodsService.update(new UpdateWrapper<MiaoshaGoods>()
+                .setSql("stock_count = stock_count - 1")
+                .eq("goods_id", goods.getId())
+                .gt("stock_count", 0)
+        );
+
+        // 更新失败，直接返回空
+        if (!result) {
+            return null;
+        }
 
         // 生成订单
         Order order = new Order();
@@ -72,7 +87,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         miaoshaOrder.setOrderId(order.getId());
         miaoshaOrder.setGoodsId(goods.getId());
         miaoshaOrderService.save(miaoshaOrder);
-
+        // 使用 Redis 保存秒杀订单
+        redisTemplate.opsForValue().set("order:" + user.getId() + ":" + goods.getId(), miaoshaOrder);
         return order;
     }
 
