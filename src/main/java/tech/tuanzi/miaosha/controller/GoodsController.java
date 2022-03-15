@@ -8,7 +8,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.thymeleaf.Thymeleaf;
 import org.thymeleaf.context.WebContext;
 import org.thymeleaf.spring5.view.ThymeleafViewResolver;
 import org.thymeleaf.util.StringUtils;
@@ -41,6 +40,8 @@ public class GoodsController {
      * 1000个线程 * 10轮的压测结果：
      * Windows 优化前 QPS：1332
      * Linux 优化前 QPS：207
+     *
+     * Windows 缓存后 QPS：2342
      */
     @RequestMapping(value = "/toList", produces = "text/html;charset=utf-8")
     @ResponseBody
