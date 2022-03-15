@@ -8,11 +8,15 @@ import tech.tuanzi.miaosha.entity.MiaoshaGoods;
 import tech.tuanzi.miaosha.entity.MiaoshaOrder;
 import tech.tuanzi.miaosha.entity.Order;
 import tech.tuanzi.miaosha.entity.User;
+import tech.tuanzi.miaosha.exception.GlobalException;
 import tech.tuanzi.miaosha.mapper.OrderMapper;
+import tech.tuanzi.miaosha.service.IGoodsService;
 import tech.tuanzi.miaosha.service.IMiaoshaGoodsService;
 import tech.tuanzi.miaosha.service.IMiaoshaOrderService;
 import tech.tuanzi.miaosha.service.IOrderService;
 import tech.tuanzi.miaosha.vo.GoodsVo;
+import tech.tuanzi.miaosha.vo.OrderDetailVo;
+import tech.tuanzi.miaosha.vo.RespBeanEnum;
 
 import java.util.Date;
 
@@ -31,6 +35,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     private OrderMapper orderMapper;
     @Autowired
     private IMiaoshaOrderService miaoshaOrderService;
+    @Autowired
+    private IGoodsService goodsService;
 
     /**
      * 秒杀
@@ -68,5 +74,21 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         miaoshaOrderService.save(miaoshaOrder);
 
         return order;
+    }
+
+    /**
+     * 订单详情
+     */
+    @Override
+    public OrderDetailVo detail(Long orderId) {
+        if (orderId == null) {
+            throw new GlobalException(RespBeanEnum.ORDER_NOT_EXIST);
+        }
+        Order order = orderMapper.selectById(orderId);
+        GoodsVo goodsVo = goodsService.findGoodsVoByGoodsId(order.getGoodsId());
+        OrderDetailVo detail = new OrderDetailVo();
+        detail.setOrder(order);
+        detail.setGoodsVo(goodsVo);
+        return detail;
     }
 }
