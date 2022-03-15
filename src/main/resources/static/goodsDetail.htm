@@ -34,17 +34,25 @@
             <td id="startTime"></td>
             <td>
                 <input type="hidden" id="remainSeconds">
-                <!--                <span th:if="${miaoshaStatus eq 0}">秒杀倒计时: <span id="countDown" th:text="${remainSeconds}"></span>秒-->
-                <!--                </span>-->
-                <!--                <span th:if="${miaoshaStatus eq 1}">秒杀进行中</span>-->
-                <!--                <span th:if="${miaoshaStatus eq 2}">秒杀已结束</span>-->
+                <!--
+                <span th:if="${miaoshaStatus eq 0}">秒杀倒计时: <span id="countDown" th:text="${remainSeconds}"></span>秒
+                                </span>
+                <span th:if="${miaoshaStatus eq 1}">秒杀进行中</span>
+                <span th:if="${miaoshaStatus eq 2}">秒杀已结束</span>
+                -->
                 <span id="miaoshaTip"></span>
             </td>
             <td>
+                <!--
                 <form id="miaoshaForm" method="post" action="/miaosha/doMiaosha">
                     <input type="hidden" name="goodsId" id="goodsId">
                     <button class="btn btn-primary btn-block" type="submit" id="buyButton">立即秒杀</button>
                 </form>
+                -->
+                <button class="btn btn-primary btn-block" type="button" id="buyButton" onclick="doMiaosha()">
+                    立即秒杀
+                    <input type="hidden" name="goodsId" id="goodsId">
+                </button>
             </td>
         </tr>
         <tr>
@@ -67,6 +75,26 @@
         // countDown();
         getDetails();
     });
+
+    function doMiaosha() {
+        $.ajax({
+            url: '/miaosha/doMiaosha',
+            type: 'POST',
+            data: {
+                goodsId: $('#goodsId').val()
+            },
+            success: function (data) {
+                if (data.code === 200) {
+                    window.location.href = "/orderDetail.htm?orderId=" + data.obj.id
+                } else {
+                    layer.msg(data.message)
+                }
+            },
+            error: function () {
+                layer.msg('客户端请求错误')
+            }
+        })
+    }
 
     function getDetails() {
         let goodsId = g_getQueryString("goodsId");
