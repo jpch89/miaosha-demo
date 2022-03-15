@@ -28,7 +28,7 @@ public class RespBean {
      * 成功返回结果
      */
     public static RespBean success(Object obj) {
-        return new RespBean(RespBeanEnum.SUCCESS.getCode(), RespBeanEnum.ERROR.getMessage(), obj);
+        return new RespBean(RespBeanEnum.SUCCESS.getCode(), RespBeanEnum.SUCCESS.getMessage(), obj);
     }
 
     /**

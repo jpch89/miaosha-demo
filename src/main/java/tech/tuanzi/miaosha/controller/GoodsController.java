@@ -13,7 +13,9 @@ import org.thymeleaf.spring5.view.ThymeleafViewResolver;
 import org.thymeleaf.util.StringUtils;
 import tech.tuanzi.miaosha.entity.User;
 import tech.tuanzi.miaosha.service.IGoodsService;
+import tech.tuanzi.miaosha.vo.DetailVo;
 import tech.tuanzi.miaosha.vo.GoodsVo;
+import tech.tuanzi.miaosha.vo.RespBean;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -40,7 +42,7 @@ public class GoodsController {
      * 1000个线程 * 10轮的压测结果：
      * Windows 优化前 QPS：1332
      * Linux 优化前 QPS：207
-     *
+     * <p>
      * Windows 缓存后 QPS：2342
      */
     @RequestMapping(value = "/toList", produces = "text/html;charset=utf-8")
@@ -72,10 +74,10 @@ public class GoodsController {
     /**
      * 跳转商品详情页
      */
-    @RequestMapping(value = "/toDetail/{goodsId}", produces = "text/html;charset=utf-8")
+    @RequestMapping(value = "/toDetail2/{goodsId}", produces = "text/html;charset=utf-8")
     @ResponseBody
-    public String toDetail(Model model, User user, @PathVariable Long goodsId,
-                           HttpServletRequest request, HttpServletResponse response) {
+    public String toDetail2(Model model, User user, @PathVariable Long goodsId,
+                            HttpServletRequest request, HttpServletResponse response) {
         ValueOperations valueOperations = redisTemplate.opsForValue();
         // Redis 中获取页面，如果不为空，直接返回页面
         String html = (String) valueOperations.get("goodsDetails:" + goodsId);
@@ -117,5 +119,40 @@ public class GoodsController {
         }
 
         return html;
+    }
+
+    /**
+     * 跳转商品详情页
+     */
+    @RequestMapping("/detail/{goodsId}")
+    @ResponseBody
+    public RespBean toDetail(Model model, User user, @PathVariable Long goodsId) {
+        GoodsVo goodsVo = goodsService.findGoodsVoByGoodsId(goodsId);
+        Date startDate = goodsVo.getStartDate();
+        Date endDate = goodsVo.getEndDate();
+        Date nowDate = new Date();
+        // 秒杀状态
+        int miaoshaStatus = 0;
+        // 秒杀倒计时
+        int remainSeconds = 0;
+        if (nowDate.before(startDate)) {
+            // 秒杀还未开始
+            remainSeconds = (int) ((startDate.getTime() - nowDate.getTime()) / 1000);
+        } else if (nowDate.after(endDate)) {
+            // 秒杀已经结束
+            miaoshaStatus = 2;
+            remainSeconds = -1;
+        } else {
+            // 秒杀中
+            miaoshaStatus = 1;
+        }
+
+        DetailVo detailVo = new DetailVo();
+        detailVo.setUser(user);
+        detailVo.setGoodsVo(goodsVo);
+        detailVo.setMiaoshaStatus(miaoshaStatus);
+        detailVo.setRemainSeconds(remainSeconds);
+
+        return RespBean.success(detailVo);
     }
 }
