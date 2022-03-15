@@ -31,6 +31,8 @@ public class MiaoshaController {
 
     /**
      * 秒杀
+     * Windows 优化前 QPS：785
+     * Linux 优化前 QPS：170
      */
     @RequestMapping("/doMiaosha")
     public String doMiaosha(Model model, User user, Long goodsId) {

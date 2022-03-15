@@ -54,6 +54,4 @@ public class User implements Serializable {
      * 登录次数
      */
     private Integer loginCount;
-
-
 }
