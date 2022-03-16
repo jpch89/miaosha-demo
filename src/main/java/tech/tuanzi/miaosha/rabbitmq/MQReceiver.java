@@ -12,11 +12,11 @@ import org.springframework.stereotype.Service;
 @Service
 @Slf4j
 public class MQReceiver {
-    @RabbitListener(queues = "queue")
-    public void receive(Object msg) {
-        log.info("接收消息：" + msg);
-    }
-
+    // @RabbitListener(queues = "queue")
+    // public void receive(Object msg) {
+    //     log.info("接收消息：" + msg);
+    // }
+    //
     // // 队列名称要与 RabbitMQConfig 中保持一致
     // @RabbitListener(queues = "queue_fanout01")
     // public void receive01(Object msg) {

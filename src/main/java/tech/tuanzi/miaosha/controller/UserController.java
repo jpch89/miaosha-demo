@@ -27,39 +27,39 @@ public class UserController {
         return RespBean.success(user);
     }
 
-    /**
-     * 测试发送 RabbitMQ 消息
-     */
-    @RequestMapping("/mq")
-    @ResponseBody
-    public void mq() {
-        mqSender.send("Hello");
-    }
-
-    /**
-     * Fanout 模式
-     */
-    @RequestMapping("/mq/fanout")
-    @ResponseBody
-    public void mq01() {
-        mqSender.send("Hello");
-    }
-
     // /**
-    //  * Direct 模式
+    //  * 测试发送 RabbitMQ 消息
     //  */
-    // @RequestMapping("/mq/direct01")
+    // @RequestMapping("/mq")
     // @ResponseBody
-    // public void mq02() {
-    //     mqSender.send01("Hello, Red");
+    // public void mq() {
+    //     mqSender.send("Hello");
     // }
     //
     // /**
-    //  * Direct 模式
+    //  * Fanout 模式
     //  */
-    // @RequestMapping("/mq/direct02")
+    // @RequestMapping("/mq/fanout")
     // @ResponseBody
-    // public void mq03() {
-    //     mqSender.send02("Hello, Green");
+    // public void mq01() {
+    //     mqSender.send("Hello");
     // }
+
+    /**
+     * Direct 模式
+     */
+    @RequestMapping("/mq/direct01")
+    @ResponseBody
+    public void mq02() {
+        mqSender.send01("Hello, Red");
+    }
+
+    /**
+     * Direct 模式
+     */
+    @RequestMapping("/mq/direct02")
+    @ResponseBody
+    public void mq03() {
+        mqSender.send02("Hello, Green");
+    }
 }
