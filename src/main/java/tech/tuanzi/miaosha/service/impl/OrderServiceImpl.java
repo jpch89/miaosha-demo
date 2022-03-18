@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.tuanzi.miaosha.entity.MiaoshaGoods;
@@ -61,7 +62,10 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         );
 
         // 更新失败，直接返回空
-        if (!result) {
+        ValueOperations valueOperations = redisTemplate.opsForValue();
+        if (miaoshaGoods.getStockCount() < 1) {
+            // 判断是否还有库存
+            valueOperations.set("isStockEmpty:" + goods.getId(), "0");
             return null;
         }
 

@@ -158,6 +158,23 @@ public class MiaoshaController implements InitializingBean {
     }
 
     /**
+     * 获取秒杀结果
+     *
+     * @return 如果返回 orderId 表示秒杀成功；返回 -1 表示秒杀失败，返回 0 表示排队中
+     */
+    @RequestMapping(value = "/result", method = RequestMethod.GET)
+    @ResponseBody
+    public RespBean getResult(User user, Long goodsId) {
+        if (user == null) {
+            return RespBean.error(RespBeanEnum.SESSION_ERROR);
+        }
+
+        // 弹幕说：秒杀成功后我们会将订单信息存入 Redis，这里建议从 Redis 中查
+        Long orderId = miaoshaOrderService.getResult(user, goodsId);
+        return RespBean.success(orderId);
+    }
+
+    /**
      * 系统初始化，把商品库存数量加载到 Redis 里面去
      */
     @Override
