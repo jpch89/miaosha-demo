@@ -53,10 +53,17 @@
                 <!--
                 <button class="btn btn-primary btn-block" type="button" id="buyButton" onclick="doMiaosha()">
                 -->
-                <button class="btn btn-primary btn-block" type="button" id="buyButton" onclick="getMiaoshaPath()">
-                    立即秒杀
-                    <input type="hidden" name="goodsId" id="goodsId">
-                </button>
+                <div class="row">
+                    <div class="form-inline">
+                        <img id="captchaImg" onclick="refreshCaptcha()" width="130" height="32" style="display: none"/>
+                        <input id="captcha" class="form-control" style="display: none">
+                        <button class="btn btn-primary" type="button" id="buyButton"
+                                onclick="getMiaoshaPath()">
+                            立即秒杀
+                            <input type="hidden" name="goodsId" id="goodsId">
+                        </button>
+                    </div>
+                </div>
             </td>
         </tr>
         <tr>
@@ -79,6 +86,12 @@
         // countDown();
         getDetails();
     });
+
+    function refreshCaptcha() {
+        let goodsId = $('#goodsId').val();
+        // 加时间戳，可以防止缓存的影响（虽然缓存已经在后端关闭了）
+        $('#captchaImg').attr('src', '/miaosha/captcha?goodsId=' + goodsId + "&time=" + new Date());
+    }
 
     function getMiaoshaPath() {
         let goodsId = $('#goodsId').val();
@@ -213,9 +226,14 @@
                 clearTimeout(timeout);
             }
             $("#miaoshaTip").html("秒杀进行中")
+            refreshCaptcha()
+            $('#captchaImg').show()
+            $('#captcha').show()
         } else {
             $("#buyButton").attr("disabled", true);
             $("#miaoshaTip").html("秒杀已经结束");
+            $('#captchaImg').hide()
+            $('#captcha').hide()
         }
     };
 

@@ -1,6 +1,8 @@
 package tech.tuanzi.miaosha.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.wf.captcha.ArithmeticCaptcha;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -16,6 +18,7 @@ import tech.tuanzi.miaosha.entity.MiaoshaMessage;
 import tech.tuanzi.miaosha.entity.MiaoshaOrder;
 import tech.tuanzi.miaosha.entity.Order;
 import tech.tuanzi.miaosha.entity.User;
+import tech.tuanzi.miaosha.exception.GlobalException;
 import tech.tuanzi.miaosha.rabbitmq.MiaoshaSender;
 import tech.tuanzi.miaosha.service.IGoodsService;
 import tech.tuanzi.miaosha.service.IMiaoshaOrderService;
@@ -25,16 +28,20 @@ import tech.tuanzi.miaosha.vo.GoodsVo;
 import tech.tuanzi.miaosha.vo.RespBean;
 import tech.tuanzi.miaosha.vo.RespBeanEnum;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 秒杀
  *
  * @author Patrick Ji
  */
+@Slf4j
 @Controller
 @RequestMapping("/miaosha")
 public class MiaoshaController implements InitializingBean {
@@ -194,6 +201,29 @@ public class MiaoshaController implements InitializingBean {
         }
         String path = orderService.createPath(user, goodsId);
         return RespBean.success(path);
+    }
+
+    @RequestMapping(value = "/captcha", method = RequestMethod.GET)
+    public void verifyCode(User user, Long goodsId, HttpServletResponse response) {
+        if (null == user || goodsId < 0) {
+            throw new GlobalException(RespBeanEnum.REQUEST_ILLEGAL);
+        }
+        // 设置响应头为输出图片的类型
+        response.setContentType("image/jpg");
+        response.setHeader("Pragma", "No-cache");
+        response.setHeader("Cache-Control", "no-cache");
+        response.setDateHeader("Expires", 0);
+        // 生成验证码，将结果放入 Redis
+        ArithmeticCaptcha captcha = new ArithmeticCaptcha(130, 32, 3);
+        redisTemplate.opsForValue().set(
+                "captcha:" + user.getId() + ":" + goodsId, captcha.text(),
+                300, TimeUnit.SECONDS
+        );
+        try {
+            captcha.out(response.getOutputStream());
+        } catch (IOException e) {
+            log.error("验证码生成失败", e.getMessage());
+        }
     }
 
     /**
