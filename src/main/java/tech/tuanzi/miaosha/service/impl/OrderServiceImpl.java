@@ -8,6 +8,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.thymeleaf.util.StringUtils;
 import tech.tuanzi.miaosha.entity.MiaoshaGoods;
 import tech.tuanzi.miaosha.entity.MiaoshaOrder;
 import tech.tuanzi.miaosha.entity.Order;
@@ -18,11 +19,14 @@ import tech.tuanzi.miaosha.service.IGoodsService;
 import tech.tuanzi.miaosha.service.IMiaoshaGoodsService;
 import tech.tuanzi.miaosha.service.IMiaoshaOrderService;
 import tech.tuanzi.miaosha.service.IOrderService;
+import tech.tuanzi.miaosha.utils.MD5Util;
+import tech.tuanzi.miaosha.utils.UUIDUtil;
 import tech.tuanzi.miaosha.vo.GoodsVo;
 import tech.tuanzi.miaosha.vo.OrderDetailVo;
 import tech.tuanzi.miaosha.vo.RespBeanEnum;
 
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 /**
  * <p>
@@ -110,5 +114,25 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         detail.setOrder(order);
         detail.setGoodsVo(goodsVo);
         return detail;
+    }
+
+    /**
+     * 获取秒杀地址
+     */
+    @Override
+    public String createPath(User user, Long goodsId) {
+        String path = MD5Util.md5(UUIDUtil.uuid() + "123456");
+        // 这种随机生成的地址，不会保存很长时间，所以存到 Redis 里面
+        redisTemplate.opsForValue().set("miaoshaPath:" + user.getId() + ":" + goodsId, path, 60, TimeUnit.SECONDS);
+        return path;
+    }
+
+    @Override
+    public boolean checkPath(User user, Long goodsId, String path) {
+        if (null == user || goodsId < 0 || StringUtils.isEmpty(path)) {
+            return false;
+        }
+        String redisPath = (String) redisTemplate.opsForValue().get("miaoshaPath:" + user.getId() + ":" + goodsId);
+        return path.equals(redisPath);
     }
 }

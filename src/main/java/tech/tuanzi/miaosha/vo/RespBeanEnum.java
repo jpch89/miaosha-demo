@@ -32,9 +32,11 @@ public enum RespBeanEnum {
     PASSWORD_UPDATE_FAIL(500214, "密码更新失败"),
     // 用户不存在
     SESSION_ERROR(500215, "用户不存在"),
+
     // 秒杀模块：5005xx
     EMPTY_STOCK(500500, "库存不足"),
     REPEAT_ERROR(500501, "该商品每人限购一件"),
+    REQUEST_ILLEGAL(500502, "请求非法，请重新尝试"),
 
     // 订单模块：5003xx
     ORDER_NOT_EXIST(500300, "订单信息不存在"),

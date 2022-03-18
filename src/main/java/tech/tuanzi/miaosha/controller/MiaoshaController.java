@@ -4,11 +4,11 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -67,11 +67,17 @@ public class MiaoshaController implements InitializingBean {
      * 缓存后 Windows QPS：1356
      * RabbitMQ 后 Windows QPS：2454
      */
-    @RequestMapping(value = "/doMiaosha", method = RequestMethod.POST)
+    @RequestMapping(value = "/{path}/doMiaosha", method = RequestMethod.POST)
     @ResponseBody
-    public RespBean doMiaosha(Model model, User user, Long goodsId) {
+    public RespBean doMiaosha(@PathVariable("path") String path, User user, Long goodsId) {
         if (user == null) {
             return RespBean.error(RespBeanEnum.SESSION_ERROR);
+        }
+
+        // 检查秒杀接口正确性
+        boolean check = orderService.checkPath(user, goodsId, path);
+        if (!check) {
+            return RespBean.error(RespBeanEnum.REQUEST_ILLEGAL);
         }
 
         // 通过内存标记，减少对 Redis 的访问（弹幕说：不能用在分布式环境）
@@ -79,25 +85,20 @@ public class MiaoshaController implements InitializingBean {
             return RespBean.error(RespBeanEnum.EMPTY_STOCK);
         }
 
-        ValueOperations valueOperations = redisTemplate.opsForValue();
         // 判断是否重复抢购
         MiaoshaOrder miaoshaOrder = (MiaoshaOrder) redisTemplate
                 .opsForValue()
                 .get("order:" + user.getId() + ":" + goodsId);
         if (miaoshaOrder != null) {
-            model.addAttribute("errmsg", RespBeanEnum.REPEAT_ERROR.getMessage());
             return RespBean.error(RespBeanEnum.REPEAT_ERROR);
         }
 
         // 预减库存
-        // Long stock = valueOperations.decrement("miaoshaGoods:" + goodsId);
         Long stock = (Long) redisTemplate.execute(
                 stockScript, Collections.singletonList("miaoshaGoods:" + goodsId), Collections.EMPTY_LIST
         );
-        // if (stock < 0) {
         if (stock <= 0) {
             emptyStockMap.put(goodsId, true);
-            // valueOperations.increment("miaoshaGoods:" + goodsId);
             return RespBean.error(RespBeanEnum.EMPTY_STOCK);
         }
 
@@ -180,6 +181,19 @@ public class MiaoshaController implements InitializingBean {
         // 弹幕说：秒杀成功后我们会将订单信息存入 Redis，这里建议从 Redis 中查
         Long orderId = miaoshaOrderService.getResult(user, goodsId);
         return RespBean.success(orderId);
+    }
+
+    /**
+     * 获取秒杀地址
+     */
+    @RequestMapping(value = "/path", method = RequestMethod.GET)
+    @ResponseBody
+    public RespBean getPath(User user, Long goodsId) {
+        if (null == user) {
+            return RespBean.error(RespBeanEnum.SESSION_ERROR);
+        }
+        String path = orderService.createPath(user, goodsId);
+        return RespBean.success(path);
     }
 
     /**
