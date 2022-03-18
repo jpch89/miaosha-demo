@@ -15,7 +15,6 @@ import tech.tuanzi.miaosha.entity.MiaoshaMessage;
 import tech.tuanzi.miaosha.entity.MiaoshaOrder;
 import tech.tuanzi.miaosha.entity.Order;
 import tech.tuanzi.miaosha.entity.User;
-import tech.tuanzi.miaosha.rabbitmq.MQSender;
 import tech.tuanzi.miaosha.rabbitmq.MiaoshaSender;
 import tech.tuanzi.miaosha.service.IGoodsService;
 import tech.tuanzi.miaosha.service.IMiaoshaOrderService;
@@ -60,8 +59,8 @@ public class MiaoshaController implements InitializingBean {
      * Windows 优化前 QPS：785
      * Linux 优化前 QPS：170
      * <p>
-     * 缓存后：
-     * Windows QPS：1356
+     * 缓存后 Windows QPS：1356
+     * RabbitMQ 后 Windows QPS：2454
      */
     @RequestMapping(value = "/doMiaosha", method = RequestMethod.POST)
     @ResponseBody
