@@ -5,6 +5,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.CollectionUtils;
@@ -24,6 +25,7 @@ import tech.tuanzi.miaosha.vo.GoodsVo;
 import tech.tuanzi.miaosha.vo.RespBean;
 import tech.tuanzi.miaosha.vo.RespBeanEnum;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,6 +48,9 @@ public class MiaoshaController implements InitializingBean {
     private RedisTemplate redisTemplate;
     @Autowired
     private MiaoshaSender miaoshaSender;
+
+    @Autowired
+    private RedisScript<Long> stockScript;
 
     /**
      * 内存标记
@@ -85,10 +90,14 @@ public class MiaoshaController implements InitializingBean {
         }
 
         // 预减库存
-        Long stock = valueOperations.decrement("miaoshaGoods:" + goodsId);
-        if (stock < 0) {
+        // Long stock = valueOperations.decrement("miaoshaGoods:" + goodsId);
+        Long stock = (Long) redisTemplate.execute(
+                stockScript, Collections.singletonList("miaoshaGoods:" + goodsId), Collections.EMPTY_LIST
+        );
+        // if (stock < 0) {
+        if (stock <= 0) {
             emptyStockMap.put(goodsId, true);
-            valueOperations.increment("miaoshaGoods:" + goodsId);
+            // valueOperations.increment("miaoshaGoods:" + goodsId);
             return RespBean.error(RespBeanEnum.EMPTY_STOCK);
         }
 

@@ -44,4 +44,13 @@ public class RedisConfig {
         redisScript.setResultType(Boolean.class);
         return redisScript;
     }
+
+    @Bean
+    public DefaultRedisScript<Long> stockScript() {
+        DefaultRedisScript<Long> redisScript = new DefaultRedisScript<>();
+        // stock.lua 脚本位置在 application.yml 同级目录
+        redisScript.setLocation(new ClassPathResource("stock.lua"));
+        redisScript.setResultType(Long.class);
+        return redisScript;
+    }
 }

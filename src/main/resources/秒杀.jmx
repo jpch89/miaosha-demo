@@ -80,7 +80,7 @@
         <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="用户信息" enabled="true">
           <stringProp name="delimiter">,</stringProp>
           <stringProp name="fileEncoding">UTF-8</stringProp>
-          <stringProp name="filename">D:/dev/tools/apache-jmeter-5.4.3/config.txt</stringProp>
+          <stringProp name="filename">D:/dev/learn/blbl/miaosha/src/main/resources/config.txt</stringProp>
           <boolProp name="ignoreFirstLine">false</boolProp>
           <boolProp name="quotedData">false</boolProp>
           <boolProp name="recycle">true</boolProp>
