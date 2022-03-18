@@ -95,12 +95,14 @@
 
     function getMiaoshaPath() {
         let goodsId = $('#goodsId').val();
+        let captcha = $('#captcha').val();
         g_showLoading();
         $.ajax({
             url: '/miaosha/path',
             type: 'GET',
             data: {
                 goodsId,
+                captcha,
             },
             success: function (data) {
                 if (data.code === 200) {

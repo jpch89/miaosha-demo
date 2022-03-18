@@ -127,6 +127,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         return path;
     }
 
+    /**
+     * 校验秒杀地址
+     */
     @Override
     public boolean checkPath(User user, Long goodsId, String path) {
         if (null == user || goodsId < 0 || StringUtils.isEmpty(path)) {
@@ -134,5 +137,17 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         }
         String redisPath = (String) redisTemplate.opsForValue().get("miaoshaPath:" + user.getId() + ":" + goodsId);
         return path.equals(redisPath);
+    }
+
+    /**
+     * 校验验证码
+     */
+    @Override
+    public boolean checkCaptcha(User user, Long goodsId, String captcha) {
+        if (StringUtils.isEmpty(captcha) || user == null || goodsId < 0) {
+            return false;
+        }
+        String redisCaptcha = (String) redisTemplate.opsForValue().get("captcha:" + user.getId() + ":" + goodsId);
+        return captcha.equals(redisCaptcha);
     }
 }
