@@ -6,7 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -15,6 +14,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+import tech.tuanzi.miaosha.common.AccessLimit;
 import tech.tuanzi.miaosha.entity.MiaoshaMessage;
 import tech.tuanzi.miaosha.entity.MiaoshaOrder;
 import tech.tuanzi.miaosha.entity.Order;
@@ -195,6 +195,7 @@ public class MiaoshaController implements InitializingBean {
     /**
      * 获取秒杀地址
      */
+    @AccessLimit(second = 5, maxCount = 5, needLogin = true)
     @RequestMapping(value = "/path", method = RequestMethod.GET)
     @ResponseBody
     public RespBean getPath(User user, Long goodsId, String captcha, HttpServletRequest request) {
@@ -202,17 +203,18 @@ public class MiaoshaController implements InitializingBean {
             return RespBean.error(RespBeanEnum.SESSION_ERROR);
         }
 
-        ValueOperations valueOperations = redisTemplate.opsForValue();
-        // 限制访问次数，5 秒内访问 5 次
-        String uri = request.getRequestURI();
-        Integer count = (Integer) valueOperations.get(uri + ":" + user.getId());
-        if (count == null) {
-            valueOperations.set(uri + ":" + user.getId(), 1, 5, TimeUnit.SECONDS);
-        } else if (count < 5) {
-            valueOperations.increment(uri + ":" + user.getId());
-        } else {
-            return RespBean.error(RespBeanEnum.ACCESS_LIMIT_REACHED);
-        }
+        // 简单限流（固定窗口计数器）
+        // ValueOperations valueOperations = redisTemplate.opsForValue();
+        // // 限制访问次数，5 秒内访问 5 次
+        // String uri = request.getRequestURI();
+        // Integer count = (Integer) valueOperations.get(uri + ":" + user.getId());
+        // if (count == null) {
+        //     valueOperations.set(uri + ":" + user.getId(), 1, 5, TimeUnit.SECONDS);
+        // } else if (count < 5) {
+        //     valueOperations.increment(uri + ":" + user.getId());
+        // } else {
+        //     return RespBean.error(RespBeanEnum.ACCESS_LIMIT_REACHED);
+        // }
 
         // 检查验证码
         captcha = "0";

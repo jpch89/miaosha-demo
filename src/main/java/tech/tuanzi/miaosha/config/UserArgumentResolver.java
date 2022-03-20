@@ -8,6 +8,7 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.thymeleaf.util.StringUtils;
+import tech.tuanzi.miaosha.common.UserContext;
 import tech.tuanzi.miaosha.entity.User;
 import tech.tuanzi.miaosha.service.IUserService;
 import tech.tuanzi.miaosha.utils.CookieUtil;
@@ -33,13 +34,14 @@ public class UserArgumentResolver implements HandlerMethodArgumentResolver {
 
     @Override
     public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer, NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
-        HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
-        HttpServletResponse response = webRequest.getNativeResponse(HttpServletResponse.class);
-        // 获取票据
-        String ticket = CookieUtil.getCookieValue(request, "userTicket");
-        if (StringUtils.isEmpty(ticket)) {
-            return null;
-        }
-        return userService.getUserByCookie(ticket, request, response);
+        // HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
+        // HttpServletResponse response = webRequest.getNativeResponse(HttpServletResponse.class);
+        // // 获取票据
+        // String ticket = CookieUtil.getCookieValue(request, "userTicket");
+        // if (StringUtils.isEmpty(ticket)) {
+        //     return null;
+        // }
+        // return userService.getUserByCookie(ticket, request, response);
+        return UserContext.getUser();
     }
 }
