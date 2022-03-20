@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -28,6 +29,7 @@ import tech.tuanzi.miaosha.vo.GoodsVo;
 import tech.tuanzi.miaosha.vo.RespBean;
 import tech.tuanzi.miaosha.vo.RespBeanEnum;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Collections;
@@ -195,10 +197,25 @@ public class MiaoshaController implements InitializingBean {
      */
     @RequestMapping(value = "/path", method = RequestMethod.GET)
     @ResponseBody
-    public RespBean getPath(User user, Long goodsId, String captcha) {
+    public RespBean getPath(User user, Long goodsId, String captcha, HttpServletRequest request) {
         if (null == user) {
             return RespBean.error(RespBeanEnum.SESSION_ERROR);
         }
+
+        ValueOperations valueOperations = redisTemplate.opsForValue();
+        // 限制访问次数，5 秒内访问 5 次
+        String uri = request.getRequestURI();
+        Integer count = (Integer) valueOperations.get(uri + ":" + user.getId());
+        if (count == null) {
+            valueOperations.set(uri + ":" + user.getId(), 1, 5, TimeUnit.SECONDS);
+        } else if (count < 5) {
+            valueOperations.increment(uri + ":" + user.getId());
+        } else {
+            return RespBean.error(RespBeanEnum.ACCESS_LIMIT_REACHED);
+        }
+
+        // 检查验证码
+        captcha = "0";
         boolean check = orderService.checkCaptcha(user, goodsId, captcha);
         if (!check) {
             return RespBean.error(RespBeanEnum.ERROR_CAPTCHA);
